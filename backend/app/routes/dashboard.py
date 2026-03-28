@@ -2,7 +2,10 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from backend import db
 from sqlalchemy import desc, asc
+from collections import defaultdict
 from app.models.user import User
+from app.models.player_answer import PlayerAnswer
+from app.models.memoreto import Memoreto
 
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -85,3 +88,68 @@ def ranking_me():
             "collection": {"href": "/dashboard/ranking",   "method": "GET"},
         },
     }), 200
+
+
+@dashboard_bp.get("/stats/scatter")
+def stats_scatter():
+    """Propuesta Gráfica: Scatter Plot — Tiempo vs Puntuación por Dificultad"""
+    rows = (
+        db.session.query(PlayerAnswer, User, Memoreto)
+        .join(User, PlayerAnswer.user_id == User.id)
+        .join(Memoreto, PlayerAnswer.memoreto_id == Memoreto.id)
+        .filter(
+            PlayerAnswer.resuelto == True,
+            PlayerAnswer.time_seconds.isnot(None),
+        )
+        .all()
+    )
+
+    data = [
+        {
+            "username":     u.username,
+            "score":        pa.score,
+            "time_seconds": pa.time_seconds,
+            "dificultad":   m.dificultad,
+            "memoreto":     m.title,
+            "intentos":     pa.intentos,
+        }
+        for pa, u, m in rows
+    ]
+
+    return jsonify({"data": data}), 200
+
+
+@dashboard_bp.get("/stats/progreso")
+def stats_progreso():
+    """Propuesta Gráfica: Line Chart — Progreso acumulado de puntaje por estudiante"""
+    rows = (
+        db.session.query(
+            User.username,
+            PlayerAnswer.submitted_at,
+            PlayerAnswer.score,
+        )
+        .join(User, PlayerAnswer.user_id == User.id)
+        .filter(
+            PlayerAnswer.resuelto == True,
+            User.rol == "estudiante",
+        )
+        .order_by(User.username, PlayerAnswer.submitted_at)
+        .all()
+    )
+
+    user_entries = defaultdict(list)
+    for username, submitted_at, score in rows:
+        date_str = submitted_at.strftime("%Y-%m-%d") if submitted_at else None
+        if date_str:
+            user_entries[username].append({"date": date_str, "score": score})
+
+    result = {}
+    for username, entries in user_entries.items():
+        cumulative = 0
+        seen = {}
+        for entry in entries:
+            cumulative += entry["score"]
+            seen[entry["date"]] = cumulative
+        result[username] = [{"date": d, "score_acumulado": s} for d, s in seen.items()]
+
+    return jsonify({"data": result}), 200

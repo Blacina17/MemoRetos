@@ -29,6 +29,12 @@ export class ApiService {
   globalRanking(token: string) {
     return request('GET', '/dashboard/ranking', null, token);
   }
+  dashboardScatter(token: string) {
+    return request('GET', '/dashboard/stats/scatter', null, token);
+  }
+  dashboardProgreso(token: string) {
+    return request('GET', '/dashboard/stats/progreso', null, token);
+  }
 
   // ── Memoretos CRUD ──
   getMyMemoretos(token: string) {
