@@ -35,7 +35,7 @@ def _links_collection():
 def get_published():
     memoretos = Memoreto.query.filter_by(is_published=True).all()
     return jsonify({
-        "memoretos": [m.to_dict() for m in memoretos],
+        "memoretos": [m.to_dict(full=True) for m in memoretos],
         "count": len(memoretos),
         "_links": _links_collection(),
     }), 200

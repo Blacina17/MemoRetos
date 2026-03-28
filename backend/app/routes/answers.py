@@ -241,8 +241,7 @@ def validar_solucion(id_memoreto, answers):
             solucion = {}
 
     if not solucion:
-        # Sin solución guardada → fallback aleatorio (hasta que el docente use el editor)
-        return random.choice([True, False])
+        return False  # Sin solución definida, el memoreto no puede resolverse
 
     # Convertir answers a dict {str(node_id): value}
     answers_dict = {}
@@ -259,10 +258,16 @@ def validar_solucion(id_memoreto, answers):
 
 
 def obtener_posicion_ranking(id_memoreto, score):
-    """
-    Calcula la posición del usuario en el ranking para este memoreto
-    """
-    return random.randint(1, 50) #Por el momento algo aleatorio
+    better = (
+        db.session.query(db.func.count(db.distinct(PlayerAnswer.user_id)))
+        .filter(
+            PlayerAnswer.memoreto_id == int(id_memoreto),
+            PlayerAnswer.resuelto == True,
+            PlayerAnswer.score > score,
+        )
+        .scalar() or 0
+    )
+    return better + 1
 
 
 @answers_bp.route("/ranking/<memoreto_id>", methods=['GET']) 
@@ -280,20 +285,22 @@ def get_ranking(memoreto_id):
             "code": 404
         }), 404
     
-    # Ejemplo de salida
-    ranking_ejemplo = [
-        {"position": 1, "username": "juan_pp", "score": 4850},
-        {"position": 2, "username": "maria_gm", "score": 4620},
-        {"position": 3, "username": "carlos_rt", "score": 4390},
-        {"position": 4, "username": "ana_lg", "score": 4100},
-        {"position": 5, "username": "luis_mr", "score": 3750},
-    ]
-    
+    rows = (
+        db.session.query(User.username, db.func.max(PlayerAnswer.score).label("best_score"))
+        .join(PlayerAnswer, PlayerAnswer.user_id == User.id)
+        .filter(PlayerAnswer.memoreto_id == int(memoreto_id), PlayerAnswer.resuelto == True)
+        .group_by(User.id)
+        .order_by(db.desc("best_score"))
+        .limit(10)
+        .all()
+    )
+    ranking = [{"position": i + 1, "username": r.username, "score": r.best_score} for i, r in enumerate(rows)]
+
     return jsonify({
         "memoreto_id": memoreto_id,
         "memoreto_name": memoreto.title,
-        "ranking": ranking_ejemplo,
-        "total_players": 150
+        "ranking": ranking,
+        "total_players": len(ranking),
     }), 200
 
 
