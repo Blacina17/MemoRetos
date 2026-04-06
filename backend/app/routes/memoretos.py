@@ -130,6 +130,52 @@ def update_memoreto(memo_id):
     }), 200
 
 
+# ── GET /memoretos/{id}/answers — resultados de Unity para el docente ────────
+@memoretos_bp.get("/<int:memo_id>/answers")
+@jwt_required()
+def get_memoreto_answers(memo_id):
+    user_id = int(get_jwt_identity())
+    m = Memoreto.query.get(memo_id)
+    if not m:
+        return jsonify({"error": True, "message": "Memoreto no encontrado", "code": 404}), 404
+    if m.created_by != user_id:
+        return jsonify({"error": True, "message": "Solo el autor puede ver estos resultados", "code": 403}), 403
+
+    from app.models.player_answer import PlayerAnswer
+    from app.models.user import User
+
+    rows = (
+        PlayerAnswer.query
+        .filter_by(memoreto_id=memo_id)
+        .order_by(PlayerAnswer.submitted_at.desc())
+        .all()
+    )
+
+    resueltos = [a for a in rows if a.resuelto]
+    avg_score = round(sum(a.score for a in resueltos) / len(resueltos), 1) if resueltos else 0
+
+    answers = []
+    for a in rows:
+        u = User.query.get(a.user_id)
+        answers.append({
+            "username":     u.username if u else "?",
+            "name":         f"{u.name} {u.lastname}" if u else "?",
+            "score":        a.score,
+            "intentos":     a.intentos,
+            "resuelto":     a.resuelto,
+            "submitted_at": a.submitted_at.isoformat() if a.submitted_at else None,
+        })
+
+    return jsonify({
+        "memoreto_id":     memo_id,
+        "memoreto_title":  m.title,
+        "total_attempts":  len(rows),
+        "unique_solvers":  len(resueltos),
+        "avg_score":       avg_score,
+        "answers":         answers,
+    }), 200
+
+
 # ── DELETE /memoretos/{id} ────────────────────────────────────────────────────
 @memoretos_bp.delete("/<int:memo_id>")
 @jwt_required()

@@ -31,7 +31,7 @@ class User(db.Model):
             "username":            self.username,
             "email":               self.email,
             "rol":                 self.rol,
-            "group":               self.group,
+            "group":               self.group or "",
             "total_score":         self.total_score or 0,
             "tutorial_completed": self.tutorial_completed,
         }

@@ -30,7 +30,7 @@ class Memoreto(db.Model):
             "id":           self.id,
             "title":        self.title,
             "nivel":        self.nivel,
-            "fase":         self.fase,
+            "fase":         self.fase or 0,
             "dificultad":   self.dificultad,
             "is_published": self.is_published,
             "is_validated": self.is_validated,

@@ -52,6 +52,9 @@ export class ApiService {
   deleteMemoreto(id: string | number, token: string) {
     return request('DELETE', `/memoretos/${id}`, null, token);
   }
+  getMemoretoAnswers(id: string | number, token: string) {
+    return request('GET', `/memoretos/${id}/answers`, null, token);
+  }
 
   // ── Grupos ──
   getMyGroups(token: string) {
