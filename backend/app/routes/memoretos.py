@@ -30,6 +30,15 @@ def _links_collection():
 # Soporta ?published=true para publicados y ?owner=me para los del docente.
 # También conserva las sub-rutas /published y /mine por compatibilidad con Unity.
 
+@memoretos_bp.get("/public/<int:memo_id>")
+def get_public(memo_id):
+    """Endpoint sin autenticacion para Unity (modo directo / prueba)."""
+    m = Memoreto.query.filter_by(id=memo_id, is_published=True).first()
+    if not m:
+        return jsonify({"error": "Memoreto no encontrado"}), 404
+    return jsonify(m.to_dict(full=True)), 200
+
+
 @memoretos_bp.get("/published")
 @jwt_required()
 def get_published():

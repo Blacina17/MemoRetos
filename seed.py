@@ -68,77 +68,161 @@ with app.app_context():
     db.session.commit()
     print(f"{len(users)} usuarios creados.")
 
+    # ── Memoretos en formato server.py: shapes + nodos con posiciones explícitas ─
+
+    # Memoreto 1: 3 circulos entrelazados, 6 puntos de interseccion
     memo1 = Memoreto(
-        title="Triangulo + Rectangulo Basico",
+        title="Tres Circulos Entrelazados",
         nivel=1, fase=1, dificultad="easy",
-        figuras_json=json.dumps([
-            {
-                "id": 1, "type": "triangulo", "color": "#4F46E5",
-                "operacion": "suma", "target": 10, "nodos": [1, 2, 4]
-            },
-            {
-                "id": 2, "type": "rectangulo", "color": "#10B981",
-                "operacion": "suma", "target": 7, "nodos": [2, 3, 4]
-            }
-        ]),
-        number_set=json.dumps([1, 2, 3, 4]),
-        solution_json=json.dumps({"1": 4, "2": 3, "3": 1, "4": 3}),
-        is_validated=True, is_published=True,
-        created_by=docente.id,
-    )
-
-    memo2 = Memoreto(
-        title="Doble Triangulo",
-        nivel=1, fase=2, dificultad="medium",
-        figuras_json=json.dumps([
-            {
-                "id": 1, "type": "triangulo", "color": "#EF4444",
-                "operacion": "suma", "target": 12, "nodos": [1, 2, 3]
-            },
-            {
-                "id": 2, "type": "triangulo", "color": "#F59E0B",
-                "operacion": "suma", "target": 9, "nodos": [2, 3, 5]
-            }
-        ]),
-        number_set=json.dumps([1, 2, 3, 4, 5]),
-        solution_json=json.dumps({"1": 5, "2": 4, "3": 3, "5": 2}),
-        is_validated=True, is_published=True,
-        created_by=docente.id,
-    )
-
-    # ── Nivel 1 Bosque Fase 1 (ya existe memo1) ───────────────────────────────
-    # memo1 = nivel=1, fase=1, easy  ✓
-
-    # ── Nivel 1 Bosque Fase 2 (ya existe memo2) ───────────────────────────────
-    # memo2 = nivel=1, fase=2, medium ✓
-
-    # ── Nivel 2 Desierto ─────────────────────────────────────────────────────
-    memo3 = Memoreto(
-        title="Triangulo y Circulo",
-        nivel=2, fase=1, dificultad="easy",
-        figuras_json=json.dumps([
-            {"id": 1, "type": "triangulo", "color": "#F59E0B",
-             "operacion": "suma", "target": 9, "nodos": [1, 2, 3]},
-            {"id": 2, "type": "circulo",   "color": "#EF4444",
-             "operacion": "suma", "target": 8, "nodos": [2, 3, 4]},
-        ]),
-        number_set=json.dumps([1, 2, 3, 4, 5]),
-        solution_json=json.dumps({"1": 4, "2": 2, "3": 3, "4": 3}),
-        is_validated=True, is_published=True,
-        created_by=docente.id,
-    )
-
-    memo4 = Memoreto(
-        title="Rectangulo Doble",
-        nivel=2, fase=2, dificultad="medium",
-        figuras_json=json.dumps([
-            {"id": 1, "type": "rectangulo", "color": "#10B981",
-             "operacion": "suma", "target": 12, "nodos": [1, 2, 3, 4]},
-            {"id": 2, "type": "rectangulo", "color": "#6366F1",
-             "operacion": "suma", "target": 10, "nodos": [3, 4, 5, 6]},
-        ]),
+        figuras_json=json.dumps({
+            "shapes": [
+                {"id": 1, "type": "circulo",  "color": "#3366E6", "operacion": "suma", "target": 11,
+                 "center": [-1.0,  1.0, 0], "size": [2.5, 2.5, 1]},
+                {"id": 2, "type": "circulo",  "color": "#3366E6", "operacion": "suma", "target": 11,
+                 "center": [ 1.0,  1.0, 0], "size": [2.5, 2.5, 1]},
+                {"id": 3, "type": "circulo",  "color": "#3366E6", "operacion": "suma", "target": 11,
+                 "center": [ 0.0, -.5, 0], "size": [2.5, 2.5, 1]},
+            ],
+            "nodos": [
+                {"id": 1, "position": [-1.0,  2.0, 0], "shapes": [1]},
+                {"id": 2, "position": [ 1.0,  2.0, 0], "shapes": [2]},
+                {"id": 3, "position": [-1.0,  0.0, 0], "shapes": [1, 3]},
+                {"id": 4, "position": [ 1.0,  0.0, 0], "shapes": [2, 3]},
+                {"id": 5, "position": [ 0.0,  1.5, 0], "shapes": [1, 2]},
+                {"id": 6, "position": [ 0.0, -1.0, 0], "shapes": [3]},
+            ],
+        }),
         number_set=json.dumps([1, 2, 3, 4, 5, 6]),
-        solution_json=json.dumps({"1": 3, "2": 4, "3": 2, "4": 3, "5": 1, "6": 4}),
+        solution_json=json.dumps({"1": 6, "2": 2, "3": 4, "4": 5, "5": 3, "6": 1}),
+        is_validated=True, is_published=True,
+        created_by=docente.id,
+    )
+
+    # Memoreto 2: 2 triangulos, 1 elipse, 1 rectangulo — 18 puntos de corte
+    memo2 = Memoreto(
+        title="Triangulos Elipse y Rectangulo",
+        nivel=1, fase=2, dificultad="medium",
+        figuras_json=json.dumps({
+            "shapes": [
+                {"id": 1, "type": "triangulo",  "color": "#EF4444", "operacion": "suma", "target": 57,
+                 "center": [-2.0,  0.0, 0], "size": [5.0, 5.0, 1]},
+                {"id": 2, "type": "triangulo",  "color": "#F59E0B", "operacion": "suma", "target": 57,
+                 "center": [ 2.0,  0.0, 0], "size": [5.0, 5.0, 1]},
+                {"id": 3, "type": "elipse",     "color": "#8B5CF6", "operacion": "suma", "target": 57,
+                 "center": [ 0.0,  1.5, 0], "size": [6.0, 3.0, 1]},
+                {"id": 4, "type": "rectangulo", "color": "#10B981", "operacion": "suma", "target": 57,
+                 "center": [ 0.0, -1.5, 0], "size": [6.0, 3.0, 1]},
+            ],
+            "nodos": [
+                {"id":  1, "position": [-4.0,  3.0, 0], "shapes": [1]},
+                {"id":  2, "position": [-3.0,  2.0, 0], "shapes": [1, 3]},
+                {"id":  3, "position": [-2.0,  1.5, 0], "shapes": [1, 3]},
+                {"id":  4, "position": [-1.0,  1.0, 0], "shapes": [1, 2, 3]},
+                {"id":  5, "position": [ 0.0,  2.5, 0], "shapes": [3]},
+                {"id":  6, "position": [ 1.0,  1.0, 0], "shapes": [2, 3]},
+                {"id":  7, "position": [ 2.0,  1.5, 0], "shapes": [2, 3]},
+                {"id":  8, "position": [ 3.0,  2.0, 0], "shapes": [2]},
+                {"id":  9, "position": [ 4.0,  3.0, 0], "shapes": [2]},
+                {"id": 10, "position": [-3.0, -1.0, 0], "shapes": [1, 4]},
+                {"id": 11, "position": [-2.0, -1.5, 0], "shapes": [1, 4]},
+                {"id": 12, "position": [-1.0, -2.0, 0], "shapes": [4]},
+                {"id": 13, "position": [ 0.0, -2.5, 0], "shapes": [4]},
+                {"id": 14, "position": [ 1.0, -2.0, 0], "shapes": [4]},
+                {"id": 15, "position": [ 2.0, -1.5, 0], "shapes": [2, 4]},
+                {"id": 16, "position": [ 3.0, -1.0, 0], "shapes": [2, 4]},
+                {"id": 17, "position": [-1.5, -0.5, 0], "shapes": [1]},
+                {"id": 18, "position": [ 1.5, -0.5, 0], "shapes": [2]},
+            ],
+        }),
+        number_set=json.dumps(list(range(1, 19))),
+        solution_json=json.dumps({
+            "1": 1, "2": 18, "3": 12, "4": 8, "5": 5, "6": 2,
+            "7": 14, "8": 7, "9": 10, "10": 15, "11": 11, "12": 3,
+            "13": 13, "14": 4, "15": 9, "16": 6, "17": 17, "18": 16
+        }),
+        is_validated=True, is_published=True,
+        created_by=docente.id,
+    )
+
+    # Memoreto 3: 3 circulos y 1 triangulo — 15 puntos de interseccion
+    memo3 = Memoreto(
+        title="Tres Circulos y Triangulo",
+        nivel=2, fase=1, dificultad="medium",
+        figuras_json=json.dumps({
+            "shapes": [
+                {"id": 1, "type": "circulo",   "color": "#3B82F6", "operacion": "suma", "target": 30,
+                 "center": [-2.5, -1.0, 0], "size": [4.0, 4.0, 1]},
+                {"id": 2, "type": "circulo",   "color": "#A855F7", "operacion": "suma", "target": 30,
+                 "center": [ 2.5, -1.0, 0], "size": [4.0, 4.0, 1]},
+                {"id": 3, "type": "circulo",   "color": "#06B6D4", "operacion": "suma", "target": 30,
+                 "center": [ 0.0,  2.5, 0], "size": [4.0, 4.0, 1]},
+                {"id": 4, "type": "triangulo", "color": "#EF4444", "operacion": "suma", "target": 30,
+                 "center": [ 0.0,  0.0, 0], "size": [7.0, 6.0, 1]},
+            ],
+            "nodos": [
+                {"id":  1, "position": [-3.5,  1.0, 0], "shapes": [1, 3]},
+                {"id":  2, "position": [-1.5,  1.0, 0], "shapes": [3, 4]},
+                {"id":  3, "position": [ 0.0,  3.5, 0], "shapes": [3]},
+                {"id":  4, "position": [ 1.5,  1.0, 0], "shapes": [2, 3]},
+                {"id":  5, "position": [ 3.5,  1.0, 0], "shapes": [2, 3]},
+                {"id":  6, "position": [ 0.0,  1.5, 0], "shapes": [3, 4]},
+                {"id":  7, "position": [-2.5, -0.5, 0], "shapes": [1, 4]},
+                {"id":  8, "position": [-1.0, -1.5, 0], "shapes": [1, 4]},
+                {"id":  9, "position": [ 1.0, -1.5, 0], "shapes": [2, 4]},
+                {"id": 10, "position": [ 2.5, -0.5, 0], "shapes": [2, 4]},
+                {"id": 11, "position": [-4.0, -1.5, 0], "shapes": [1]},
+                {"id": 12, "position": [-2.0, -2.5, 0], "shapes": [1]},
+                {"id": 13, "position": [ 0.0, -2.5, 0], "shapes": [1, 2]},
+                {"id": 14, "position": [ 2.0, -2.5, 0], "shapes": [2]},
+                {"id": 15, "position": [ 4.0, -1.5, 0], "shapes": [2]},
+            ],
+        }),
+        number_set=json.dumps(list(range(1, 16))),
+        solution_json=json.dumps({
+            "1": 11, "2": 5, "3": 7, "4": 3, "5": 1, "6": 14,
+            "7": 4, "8": 2, "9": 12, "10": 10, "11": 9, "12": 8,
+            "13": 15, "14": 6, "15": 13
+        }),
+        is_validated=True, is_published=True,
+        created_by=docente.id,
+    )
+
+    # Memoreto 4: 1 elipse, 1 triangulo, 1 rectangulo — 14 puntos de corte
+    memo4 = Memoreto(
+        title="Elipse Triangulo y Rectangulo",
+        nivel=2, fase=2, dificultad="hard",
+        figuras_json=json.dumps({
+            "shapes": [
+                {"id": 1, "type": "elipse",     "color": "#F59E0B", "operacion": "suma", "target": 45,
+                 "center": [0.0,  2.0, 0], "size": [6.0, 3.0, 1]},
+                {"id": 2, "type": "triangulo",  "color": "#EF4444", "operacion": "suma", "target": 45,
+                 "center": [0.0,  0.0, 0], "size": [5.0, 5.0, 1]},
+                {"id": 3, "type": "rectangulo", "color": "#10B981", "operacion": "suma", "target": 45,
+                 "center": [0.0, -1.5, 0], "size": [6.0, 3.5, 1]},
+            ],
+            "nodos": [
+                {"id":  1, "position": [-2.5,  2.5, 0], "shapes": [1]},
+                {"id":  2, "position": [-1.5,  1.5, 0], "shapes": [1, 2]},
+                {"id":  3, "position": [ 0.0,  3.0, 0], "shapes": [1]},
+                {"id":  4, "position": [ 1.5,  1.5, 0], "shapes": [1, 2]},
+                {"id":  5, "position": [ 2.5,  2.5, 0], "shapes": [1]},
+                {"id":  6, "position": [-2.0,  0.5, 0], "shapes": [1, 2]},
+                {"id":  7, "position": [ 2.0,  0.5, 0], "shapes": [1, 2]},
+                {"id":  8, "position": [-2.5, -0.5, 0], "shapes": [2, 3]},
+                {"id":  9, "position": [-1.5, -1.0, 0], "shapes": [2, 3]},
+                {"id": 10, "position": [ 0.0, -2.5, 0], "shapes": [2, 3]},
+                {"id": 11, "position": [ 1.5, -1.0, 0], "shapes": [2, 3]},
+                {"id": 12, "position": [ 2.5, -0.5, 0], "shapes": [2, 3]},
+                {"id": 13, "position": [-3.0, -2.5, 0], "shapes": [3]},
+                {"id": 14, "position": [ 3.0, -2.5, 0], "shapes": [3]},
+            ],
+        }),
+        number_set=json.dumps(list(range(1, 15))),
+        solution_json=json.dumps({
+            "1": 12, "2": 3, "3": 11, "4": 7, "5": 1, "6": 4,
+            "7": 10, "8": 5, "9": 6, "10": 2, "11": 14, "12": 8,
+            "13": 13, "14": 9
+        }),
         is_validated=True, is_published=True,
         created_by=docente.id,
     )

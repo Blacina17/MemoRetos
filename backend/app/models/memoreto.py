@@ -37,9 +37,16 @@ class Memoreto(db.Model):
             "number_set":   self._parse(self.number_set),
         }
         if full:
-            figuras = self._parse(self.figuras_json) or []
-            data["figuras"]        = figuras
-            data["intersecciones"] = self._calc_intersecciones(figuras)
+            raw = self._parse(self.figuras_json)
+            if isinstance(raw, dict) and "shapes" in raw:
+                # Formato server.py: shapes + nodos con posiciones explícitas
+                data["shapes"] = raw.get("shapes", [])
+                data["nodos"]  = raw.get("nodos",  [])
+            else:
+                # Formato legacy: lista de figuras con _geo
+                figuras = raw or []
+                data["figuras"]        = figuras
+                data["intersecciones"] = self._calc_intersecciones(figuras)
         return data
 
     def _calc_intersecciones(self, figuras):
