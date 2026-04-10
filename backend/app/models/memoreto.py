@@ -7,6 +7,7 @@ class Memoreto(db.Model):
 
     id            = db.Column(db.Integer, primary_key=True)
     title         = db.Column(db.String(128), nullable=False)
+    descripcion   = db.Column(db.Text, nullable=True)
     nivel         = db.Column(db.Integer,     nullable=False)
     fase          = db.Column(db.Integer,     nullable=True)
     dificultad    = db.Column(db.String(8), nullable=False, default="easy")
@@ -29,6 +30,7 @@ class Memoreto(db.Model):
         data = {
             "id":           self.id,
             "title":        self.title,
+            "descripcion":  self.descripcion,
             "nivel":        self.nivel,
             "fase":         self.fase or 0,
             "dificultad":   self.dificultad,

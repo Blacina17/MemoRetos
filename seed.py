@@ -73,6 +73,7 @@ with app.app_context():
     # Memoreto 1: 3 circulos entrelazados, 6 puntos de interseccion
     memo1 = Memoreto(
         title="Tres Circulos Entrelazados",
+        descripcion="Coloca los numeros del 1 al 6 en los nodos de interseccion. Cada circulo debe sumar exactamente 14.",
         nivel=1, fase=1, dificultad="easy",
         figuras_json=json.dumps({
             "shapes": [
@@ -99,6 +100,7 @@ with app.app_context():
     # Solución: T∩E{1,2,3,4,11,14}=35, T∩R{5,7,10,13}=35, E∩R{6,8,9,12}=35
     memo2 = Memoreto(
         title="Triangulo Elipse y Rectangulo",
+        descripcion="Distribuye los numeros del 1 al 14 en los nodos. El triangulo, la elipse y el rectangulo deben sumar 70 cada uno.",
         nivel=1, fase=2, dificultad="medium",
         figuras_json=json.dumps({
             "shapes": [
@@ -127,6 +129,7 @@ with app.app_context():
     # Solución: pares (1,12),(2,11),(3,10),(4,9),(5,8),(6,7) → cada par suma 13, cada figura suma 3×13=39
     memo3 = Memoreto(
         title="Tres Circulos y Triangulo",
+        descripcion="Usa los numeros del 1 al 12 en los nodos de interseccion. Los tres circulos y el triangulo deben sumar 39 cada uno.",
         nivel=2, fase=1, dificultad="medium",
         figuras_json=json.dumps({
             "shapes": [
@@ -158,6 +161,7 @@ with app.app_context():
     # Solución: cada par suma 26: C∩R_v{1,5,8,12}, C∩R_h{2,6,7,11}, R_v∩R_h{3,4,9,10}
     memo4 = Memoreto(
         title="Circulo y Cruz",
+        descripcion="Coloca los numeros del 1 al 12 en los nodos. El circulo y los dos rectangulos deben sumar 52 cada uno.",
         nivel=2, fase=2, dificultad="hard",
         figuras_json=json.dumps({
             "shapes": [
