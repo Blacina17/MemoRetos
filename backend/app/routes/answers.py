@@ -219,11 +219,29 @@ def enviar_respuesta():
     return jsonify(response), 200
 
 
+def parse_node_shapes(node_id):
+    """
+    Extrae los shape IDs de un node ID con formato "Nodo_1_2_0".
+    El ultimo segmento es el indice, los del medio son shape IDs.
+    Ej: "Nodo_1_2_0" -> [1, 2]
+    """
+    import json as _json
+    parts = node_id.split("_")
+    if len(parts) < 3:
+        return []
+    try:
+        int(parts[-1])
+        return [int(p) for p in parts[1:-1]]
+    except ValueError:
+        return []
+
+
 def validar_solucion(id_memoreto, answers):
     """
-    Valida si las respuestas del usuario son correctas.
-    Compara contra la solution_json guardada en el memoreto.
-    Si no hay solución guardada, acepta aleatoriamente (temporal).
+    Valida por restricciones:
+    - La suma de los nodos de cada figura debe igualar su target.
+    - Los valores usados deben corresponder exactamente al number_set.
+    - El shape de cada nodo se extrae del node_id: "Nodo_1_2_0" -> shapes=[1,2].
     """
     import json as _json
 
@@ -231,27 +249,39 @@ def validar_solucion(id_memoreto, answers):
     if not memoreto:
         return False
 
-    # Parsear solución guardada
-    solucion = {}
-    if memoreto.solution_json:
-        try:
-            raw = memoreto.solution_json
-            solucion = _json.loads(raw) if isinstance(raw, str) else raw
-        except Exception:
-            solucion = {}
+    try:
+        figuras_data = _json.loads(memoreto.figuras_json) if isinstance(memoreto.figuras_json, str) else memoreto.figuras_json
+    except Exception:
+        return False
 
-    if not solucion:
-        return False  # Sin solución definida, el memoreto no puede resolverse
+    shapes = figuras_data.get("shapes", [])
+    if not shapes:
+        return False
 
-    # Convertir answers a dict {str(node_id): value}
+    try:
+        number_set = _json.loads(memoreto.number_set) if isinstance(memoreto.number_set, str) else memoreto.number_set
+    except Exception:
+        number_set = []
+
+    # Construir dict de respuestas {"Nodo_1_2_0": value, ...}
     answers_dict = {}
     for item in answers:
         if 'intersection_id' in item and 'value' in item:
-            answers_dict[str(item['intersection_id'])] = item['value']
+            answers_dict[str(item['intersection_id'])] = int(item['value'])
 
-    # Verificar que cada nodo de la solución coincide con la respuesta
-    for node_id, correct_value in solucion.items():
-        if answers_dict.get(str(node_id)) != correct_value:
+    # Validar que los valores usados coincidan exactamente con el number_set
+    if number_set and sorted(answers_dict.values()) != sorted(number_set):
+        return False
+
+    # Validar que cada figura sume su target
+    for shape in shapes:
+        shape_id = shape["id"]
+        target   = shape.get("target", 0)
+        total    = sum(
+            value for node_id, value in answers_dict.items()
+            if shape_id in parse_node_shapes(node_id)
+        )
+        if total != target:
             return False
 
     return True
